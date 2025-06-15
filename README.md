@@ -12,45 +12,45 @@ Together with my first project, this work demonstrates further proficiency in Py
 
 The following graphs document the connection between passengers being 'transported to another dimension' and various other features of the passengers, based on the training data. Also included is a bar plot showing the proportion of missing values per feature, along with bar plots for logistic regression coefficients and random forest feature importances, highlighting the relative influence of each feature within the respective models.
 
-### Transported vs Not Transported
+### Transported Counts
 
-![Transported Counts](transported_counts.png)
+![Transported Counts](figures/transported_counts.png)
 
-### 
+### Transported Rate by CryoSleep
 
-![Transported Rate by CryoSleep](transported_rate_by_CryoSleep.png)
+![Transported Rate by CryoSleep](figures/transported_rate_by_CryoSleep.png)
 
-### 
+### Transported Rate by VIP
 
-![Transported Rate by VIP](transported_rate_by_VIP.png)
+![Transported Rate by VIP](figures/transported_rate_by_VIP.png)
 
-### 
+### Transported Rate by HomePlanet
 
-![Transported Rate by HomePlanet](transported_rate_by_HomePlanet.png)
+![Transported Rate by HomePlanet](figures/transported_rate_by_HomePlanet.png)
 
-### 
+### Transported Rate by Destination
 
-![Transported Rate by Destination](transported_rate_by_Destination.png)
+![Transported Rate by Destination](figures/transported_rate_by_Destination.png)
 
-### 
+### Transported Rate by Deck
 
-![Transported Rate by Deck](transported_rate_by_Deck.png)
+![Transported Rate by Deck](figures/transported_rate_by_Deck.png)
 
-### 
+### Transported Rate by Side
 
-![Transported Rate by Side](transported_rate_by_Side.png)
+![Transported Rate by Side](figures/transported_rate_by_Side.png)
 
-### 
+### Missing Values by Feature
 
-![Missing Values by Feature](missing_values.png)
+![Missing Values by Feature](figures/missing_values.png)
 
-### 
+### Logistic Regression Coefficients by Feature
 
-![Logistic Regression Coefficients by Feature](lr_coefficients.png)
+![Logistic Regression Coefficients by Feature](figures/lr_coefficients.png)
 
-### 
+### Random Forest Feature Importances
 
-![Random Forest Feature Importances](feature_importances.png)
+![Random Forest Feature Importances](figures/feature_importances.png)
 
 ## Methodology
 
