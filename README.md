@@ -1,6 +1,6 @@
 # Spaceship Titanic
 
-This project uses a dataset containing information on more than 8000 passengers aboard the fictional 'Spaceship Titanic' (`train.csv`), including details such as their name, age, cabin details, home planet, destination planet, and a binary outcome indicating whether or not they were transported to another dimension. Using the training data, we aim to predict the outcome for each passenger included in the testing data (`test.csv`. 
+This project uses a dataset containing information on more than 8000 passengers aboard the fictional 'Spaceship Titanic' (`train.csv`), including details such as their name, age, cabin details, home planet, destination planet, and a binary outcome indicating whether or not they were transported to another dimension. Using the training data, we aim to predict the outcome for each passenger included in the testing data (`test.csv`). 
 
 I used this project to build upon the skills I acquired in an [earlier project](https://github.com/oliver-house/titanic-logistic-regression), based on real data from the Titanic disaster of 1912. In my first project, only logistic regression was used. This project applies two machine learning methods in parallel: logistic regression and a random forest classifier. Both datasets (`train.csv` and `test.csv`) are provided as CSV files, which we convert into `pandas` dataframes for data cleaning, exploratory data analysis and predicting outcomes for passengers in the test data.
 
