@@ -12,9 +12,9 @@ Together with my first project, this work demonstrates further proficiency in Py
 
 The following graphs document the connection between passengers being 'transported to another dimension' and various other features of the passengers, based on the training data. Also included is a bar plot showing the proportion of missing values per feature, along with bar plots for logistic regression coefficients and random forest feature importances, highlighting the relative influence of each feature within the respective models.
 
-### Transported Counts
+### Transported vs Not Transported
 
-![Transported Counts](figures/transported_counts.png)
+![Transported vs Not Transported](figures/transported_counts.png)
 
 ### Transported Rate by CryoSleep
 
