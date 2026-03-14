@@ -76,14 +76,12 @@ def clean_data(df, spending, median_spends, modes, medians, bins):
     """ Multi-step data cleaning """
     df = df.drop(columns=['PassengerId', 'Name'])
     df = split_cabin_col(df)
-
     for col in ('HomePlanet', 'CryoSleep', 'Deck', 'Side', 'Destination', 'VIP'):
         impute_with_mode(df, col, modes[col])
     for col in ('Cabin_num', 'Age'):
         impute_with_median(df, col, medians[col])
     for col in spending:
         impute_spends(df, col, median_spends)
-
     for col in ('CryoSleep', 'VIP'):
         df[col] = df[col].map({True:1, False:0})
     df['Side'] = df['Side'].map({'S':1, 'P':0})
@@ -169,17 +167,13 @@ def random_forest(X, y, X_test, seed, feature_names, test_id):
     submission.to_csv('outputs/rf_submission.csv', index=False)
 
 
-if __name__ == '__main__':
+def main():
 
     seed = 345
-
     Path('outputs/figures').mkdir(parents=True, exist_ok=True)
-
     train = pd.read_csv('data/train.csv')
     test = pd.read_csv('data/test.csv')
-
     initial_eda(train)
-
     test_id = test['PassengerId']
     train['Transported'] = train['Transported'].map({True:1, False:0})
     spending = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
@@ -191,6 +185,7 @@ if __name__ == '__main__':
     medians = {col: train_split[col].median() for col in ('Cabin_num', 'Age')}
     median_spends = {col: train.loc[(train[col].notna()) & (train['CryoSleep'] == False), col].median() for col in spending}
     bins = {}
+
     for col in ('Cabin_num', 'Age'):
         _, bin_edges = pd.qcut(train_split[col].dropna(), q=5, retbins=True, duplicates='drop')
         bin_edges[0], bin_edges[-1] = -np.inf, np.inf  # extend outer edges to cover all test values
@@ -198,7 +193,6 @@ if __name__ == '__main__':
 
     train = clean_data(train, spending, median_spends, modes, medians, bins)
     test = clean_data(test, spending, median_spends, modes, medians, bins)
-
     X = train.drop(columns=['Transported']).copy()
     y = train['Transported'].copy()
     X_test = test.copy()
@@ -211,3 +205,6 @@ if __name__ == '__main__':
     print()
     log_regression(X, y, X_test, test_id, seed, feature_names)
     random_forest(X, y, X_test, seed, feature_names, test_id)
+
+if __name__ == '__main__':
+    main()
