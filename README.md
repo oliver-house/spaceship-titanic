@@ -14,4 +14,4 @@ Via submission to Kaggle, the random forest achieved a test accuracy of 0.79822 
 
 ## Acknowledgements
 
-Data sourced from the [Spaceship Titanic](https://www.kaggle.com/competitions/spaceship-titanic) competition, used for non-commercial, educational purposes under the [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) licence.
+Data sourced from the [Spaceship Titanic](https://www.kaggle.com/competitions/spaceship-titanic) competition.
