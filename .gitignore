@@ -3,6 +3,10 @@
 __pycache__/
 *.pyc
 
+# Virtual environment
+
+.venv/
+
 # VS Code and other IDE configurations
 
 .vscode/
