@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
@@ -21,7 +22,7 @@ def initial_eda(df):
     plt.title('Transported vs Not Transported')
     plt.ylabel('No. of Passengers')
     plt.tight_layout()
-    plt.savefig('figures/transported_counts.png')
+    plt.savefig('outputs/figures/transported_counts.png')
     plt.close()
     df_edited = df.copy()
     for col in ('HomePlanet', 'Destination', 'CryoSleep', 'VIP'):
@@ -39,7 +40,7 @@ def initial_eda(df):
         plt.xlabel(col)
         plt.ylabel('Proportion Transported')
         plt.tight_layout()
-        plt.savefig('figures/transported_rate_by_' + col + '.png')
+        plt.savefig('outputs/figures/transported_rate_by_' + col + '.png')
         plt.close()
     missing = df.isna().mean().sort_values(ascending=False)
     missing = missing[missing > 0]
@@ -50,7 +51,7 @@ def initial_eda(df):
     plt.ylabel('Proportion of Values Missing')
     plt.xticks(rotation=45, ha='right')
     plt.tight_layout()
-    plt.savefig('figures/missing_values.png')
+    plt.savefig('outputs/figures/missing_values.png')
     plt.close()
     df_cabin_split = split_cabin_col(df).copy()
     df_cabin_split['Side'] = df_cabin_split['Side'].map({'P':'Port', 'S':'Starboard'})
@@ -68,7 +69,7 @@ def initial_eda(df):
         plt.xlabel(col)
         plt.ylabel('Proportion Transported')
         plt.tight_layout()
-        plt.savefig('figures/transported_rate_by_' + col + '.png')
+        plt.savefig('outputs/figures/transported_rate_by_' + col + '.png')
         plt.close()
 
 def split_cabin_col(df):
@@ -161,7 +162,7 @@ def log_regression(X, y, X_test, test_id, seed, feature_names):
     plt.title('Logistic Regression Coefficients of Each Feature')
     plt.xlabel('Coefficient')
     plt.ylabel('Feature')
-    plt.savefig('figures/lr_coefficients.png')
+    plt.savefig('outputs/figures/lr_coefficients.png')
     plt.close()
 
     # uses logistic regression model to obtain predictions for test data
@@ -169,7 +170,7 @@ def log_regression(X, y, X_test, test_id, seed, feature_names):
     X_test_scaled = scaler.transform(X_test)
     predictions = best_model.predict(X_test_scaled) == 1
     submission = pd.DataFrame({'PassengerId': test_id, 'Transported': predictions})
-    submission.to_csv('lr_submission.csv', index=False)
+    submission.to_csv('outputs/lr_submission.csv', index=False)
 
 def random_forest(X, y, X_test, seed, feature_names, test_id):
     """ Multi-step process for implementing and testing random forest model, with final predictions for submission """
@@ -219,19 +220,21 @@ def random_forest(X, y, X_test, seed, feature_names, test_id):
     plt.title('Relative Importance of Each Feature in Random Forest Model')
     plt.xlabel('Importance')
     plt.ylabel('Feature')
-    plt.savefig('figures/feature_importances.png')
+    plt.savefig('outputs/figures/feature_importances.png')
     plt.close()
 
     # uses random forest model to obtain predictions for test data
 
     predictions = best_model.predict(X_test) == 1
     submission = pd.DataFrame({'PassengerId': test_id, 'Transported': predictions})
-    submission.to_csv('submission.csv', index=False)
+    submission.to_csv('outputs/rf_submission.csv', index=False)
 
 
 if __name__ == '__main__':
 
     seed = 345
+
+    Path('outputs/figures').mkdir(parents=True, exist_ok=True)
 
     train = pd.read_csv('data/train.csv')
     test = pd.read_csv('data/test.csv')

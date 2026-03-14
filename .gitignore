@@ -15,9 +15,7 @@ __pycache__/
 # Output files and logs
 
 *.log
-submission.csv
-lr_submission.csv
-figures/
+outputs/
 
 # Data files
 

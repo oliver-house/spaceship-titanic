@@ -14,43 +14,43 @@ The following graphs document the connection between passengers being 'transport
 
 ### Transported vs Not Transported
 
-![Transported vs Not Transported](figures/transported_counts.png)
+![Transported vs Not Transported](outputs/figures/transported_counts.png)
 
 ### Transported Rate by CryoSleep
 
-![Transported Rate by CryoSleep](figures/transported_rate_by_CryoSleep.png)
+![Transported Rate by CryoSleep](outputs/figures/transported_rate_by_CryoSleep.png)
 
 ### Transported Rate by VIP
 
-![Transported Rate by VIP](figures/transported_rate_by_VIP.png)
+![Transported Rate by VIP](outputs/figures/transported_rate_by_VIP.png)
 
 ### Transported Rate by HomePlanet
 
-![Transported Rate by HomePlanet](figures/transported_rate_by_HomePlanet.png)
+![Transported Rate by HomePlanet](outputs/figures/transported_rate_by_HomePlanet.png)
 
 ### Transported Rate by Destination
 
-![Transported Rate by Destination](figures/transported_rate_by_Destination.png)
+![Transported Rate by Destination](outputs/figures/transported_rate_by_Destination.png)
 
 ### Transported Rate by Deck
 
-![Transported Rate by Deck](figures/transported_rate_by_Deck.png)
+![Transported Rate by Deck](outputs/figures/transported_rate_by_Deck.png)
 
 ### Transported Rate by Side
 
-![Transported Rate by Side](figures/transported_rate_by_Side.png)
+![Transported Rate by Side](outputs/figures/transported_rate_by_Side.png)
 
 ### Missing Values by Feature
 
-![Missing Values by Feature](figures/missing_values.png)
+![Missing Values by Feature](outputs/figures/missing_values.png)
 
 ### Logistic Regression Coefficients by Feature
 
-![Logistic Regression Coefficients by Feature](figures/lr_coefficients.png)
+![Logistic Regression Coefficients by Feature](outputs/figures/lr_coefficients.png)
 
 ### Random Forest Feature Importances
 
-![Random Forest Feature Importances](figures/feature_importances.png)
+![Random Forest Feature Importances](outputs/figures/feature_importances.png)
 
 ## Methodology
 
@@ -62,7 +62,7 @@ Both models are tuned using `GridSearchCV`. For logistic regression, the regular
 
 ## Results
 
-Once complete, the program creates two CSVs: `submission.csv` (random forest predictions) and `lr_submission.csv` (logistic regression predictions). Via submission to Kaggle, I can confirm that the random forest model achieved an accuracy of 0.79097 (79%) for predictions on the test set `data/test.csv`, within one standard deviation of the mean accuracy of 80% obtained from cross-validation.
+Once complete, the program creates two CSVs in the `outputs/` folder: `rf_submission.csv` (random forest predictions) and `lr_submission.csv` (logistic regression predictions). Via submission to Kaggle, the random forest achieved a test accuracy of 0.79822 (80%) and logistic regression achieved 0.79494 (79%), both within one standard deviation of their respective cross-validation means and consistent with RF outperforming LR.
 
 ## Scope for further development
 
