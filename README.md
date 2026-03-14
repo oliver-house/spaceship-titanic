@@ -1,4 +1,4 @@
-# Spaceship Titanic
+# Classification Comparison
 
 This project uses a dataset of over 8000 passengers aboard the fictional 'Spaceship Titanic', with a binary outcome indicating whether each passenger was transported to another dimension. The goal is to predict this outcome for passengers in the test data.
 
