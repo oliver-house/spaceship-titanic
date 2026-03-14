@@ -10,47 +10,7 @@ Together with my first project, this work demonstrates further proficiency in Py
 
 ## Exploratory Data Analysis
 
-The following graphs document the connection between passengers being 'transported to another dimension' and various other features of the passengers, based on the training data. Also included is a bar plot showing the proportion of missing values per feature, along with bar plots for logistic regression coefficients and random forest feature importances, highlighting the relative influence of each feature within the respective models.
-
-### Transported vs Not Transported
-
-![Transported vs Not Transported](outputs/figures/transported_counts.png)
-
-### Transported Rate by CryoSleep
-
-![Transported Rate by CryoSleep](outputs/figures/transported_rate_by_CryoSleep.png)
-
-### Transported Rate by VIP
-
-![Transported Rate by VIP](outputs/figures/transported_rate_by_VIP.png)
-
-### Transported Rate by HomePlanet
-
-![Transported Rate by HomePlanet](outputs/figures/transported_rate_by_HomePlanet.png)
-
-### Transported Rate by Destination
-
-![Transported Rate by Destination](outputs/figures/transported_rate_by_Destination.png)
-
-### Transported Rate by Deck
-
-![Transported Rate by Deck](outputs/figures/transported_rate_by_Deck.png)
-
-### Transported Rate by Side
-
-![Transported Rate by Side](outputs/figures/transported_rate_by_Side.png)
-
-### Missing Values by Feature
-
-![Missing Values by Feature](outputs/figures/missing_values.png)
-
-### Logistic Regression Coefficients by Feature
-
-![Logistic Regression Coefficients by Feature](outputs/figures/lr_coefficients.png)
-
-### Random Forest Feature Importances
-
-![Random Forest Feature Importances](outputs/figures/feature_importances.png)
+Running the script saves figures to `outputs/figures/` documenting the relationship between various passenger features and the transported outcome, along with logistic regression coefficients and random forest feature importances.
 
 ## Methodology
 
@@ -58,7 +18,7 @@ Building on my first project, I incorporated an additional machine learning mode
 
 ## Validation
 
-Both models are tuned using `GridSearchCV`. For logistic regression, the regularisation parameter `C` is searched over a range of values. For the random forest, `n_estimators`, `max_depth`, and `min_samples_leaf` are tuned jointly. The full hyperparameter search results are printed when `sp_titanic.py` runs. Repeated stratified k-fold cross-validation is used as the scoring method throughout, which is much more statistically robust than a single train-test split. Logistic regression uses 5 splits × 10 repeats (50 estimates per combination); random forest uses 5 splits × 3 repeats (15 estimates per combination) to keep tuning time tractable given the larger parameter grid. Cross-validation yielded an accuracy of 80% ± 1% for the random forest model and 79% ± 1% for the logistic regression model.
+Both models are tuned using `GridSearchCV`. For logistic regression, the regularisation parameter `C` is searched over a range of values. For the random forest, `n_estimators`, `max_depth`, and `min_samples_leaf` are tuned jointly. Repeated stratified k-fold cross-validation is used as the scoring method throughout, which is much more statistically robust than a single train-test split. Logistic regression uses 5 splits × 10 repeats (50 estimates per combination); random forest uses 5 splits × 3 repeats (15 estimates per combination) to keep tuning time tractable given the larger parameter grid. Cross-validation yielded an accuracy of 80% ± 1% for the random forest model and 79% ± 1% for the logistic regression model. Note that LR coefficients should be interpreted with caution: `TotalSpend` — an engineered feature representing total spending across all categories — is included alongside the individual spend columns it is derived from, introducing collinearity that can inflate or distort individual coefficient magnitudes.
 
 ## Results
 
