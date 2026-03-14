@@ -98,8 +98,6 @@ def log_regression(X, y, X_test, test_id, seed, feature_names):
 
     model = LogisticRegression(max_iter=5000)
 
-    # hyperparameter tuning
-
     parameters = {'C':[0.01, 0.1, 1, 10, 100, 1000]}
     cross_val = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=seed)
     grid_search = GridSearchCV(model, parameters, scoring='accuracy', n_jobs=-1, cv=cross_val)
@@ -111,8 +109,6 @@ def log_regression(X, y, X_test, test_id, seed, feature_names):
     std = grid_search.cv_results_['std_test_score'][grid_search.best_index_]
     print(f"Logistic Regression: {100*mean:.0f} ± {100*std:.0f}")
 
-    # plots logistic regression coefficients for feature comparison
-
     coefs = pd.Series(best_model.coef_[0], index=feature_names).sort_values(key=abs, ascending=False)
     plt.figure(figsize=(20, max(6, 0.25 * len(coefs.index))))
     sns.barplot(x=coefs, y=coefs.index)
@@ -121,8 +117,6 @@ def log_regression(X, y, X_test, test_id, seed, feature_names):
     plt.ylabel('Feature')
     plt.savefig('outputs/figures/lr_coefficients.png')
     plt.close()
-
-    # uses logistic regression model to obtain predictions for test data
 
     X_test_scaled = scaler.transform(X_test)
     predictions = best_model.predict(X_test_scaled) == 1
@@ -133,8 +127,6 @@ def random_forest(X, y, X_test, seed, feature_names, test_id):
     """ Multi-step process for implementing and testing random forest model, with final predictions for submission """
 
     model = RandomForestClassifier(random_state=seed)
-
-    # hyperparameter tuning
 
     parameters = {
         'n_estimators':     [100, 300],
@@ -149,8 +141,6 @@ def random_forest(X, y, X_test, seed, feature_names, test_id):
     std = grid_search.cv_results_['std_test_score'][grid_search.best_index_]
     print(f"Random Forest: {100*mean:.0f} ± {100*std:.0f}")
 
-    # plots 'feature importances' to assess the influence that each feature had on the model
-
     importances = pd.Series(best_model.feature_importances_, index=feature_names).sort_values(ascending=False)
     plt.figure(figsize=(20, max(6, 0.25 * len(importances.index))))
     sns.barplot(x=importances, y=importances.index)
@@ -159,8 +149,6 @@ def random_forest(X, y, X_test, seed, feature_names, test_id):
     plt.ylabel('Feature')
     plt.savefig('outputs/figures/feature_importances.png')
     plt.close()
-
-    # uses random forest model to obtain predictions for test data
 
     predictions = best_model.predict(X_test) == 1
     submission = pd.DataFrame({'PassengerId': test_id, 'Transported': predictions})
@@ -198,8 +186,6 @@ def main():
     X_test = test.copy()
     X, X_test = X.align(X_test, join='left', axis=1, fill_value=0)
     feature_names = X.columns
-
-    # finally, apply both machine learning models and compare cross-validation accuracy
 
     print('Cross-validation accuracy per model:')
     print()
