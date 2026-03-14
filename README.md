@@ -1,8 +1,8 @@
 # Spaceship Titanic
 
-This project uses a dataset containing information on more than 8000 passengers aboard the fictional 'Spaceship Titanic' (`train.csv`), including details such as their name, age, cabin details, home planet, destination planet, and a binary outcome indicating whether or not they were transported to another dimension. Using the training data, we aim to predict the outcome for each passenger included in the testing data (`test.csv`). 
+This project uses a dataset containing information on more than 8000 passengers aboard the fictional 'Spaceship Titanic' (`data/train.csv`), including details such as their name, age, cabin details, home planet, destination planet, and a binary outcome indicating whether or not they were transported to another dimension. Using the training data, we aim to predict the outcome for each passenger included in the testing data (`data/test.csv`).
 
-I used this project to build upon the skills I acquired in an [earlier project](https://github.com/oliver-house/titanic-logistic-regression), based on real data from the Titanic disaster of 1912. In my first project, only logistic regression was used. This project applies two machine learning methods in parallel: logistic regression and a random forest classifier. Both datasets (`train.csv` and `test.csv`) are provided as CSV files, which we convert into `pandas` dataframes for data cleaning, exploratory data analysis and predicting outcomes for passengers in the test data.
+I used this project to build upon the skills I acquired in an [earlier project](https://github.com/oliver-house/titanic-logistic-regression), based on real data from the Titanic disaster of 1912. In my first project, only logistic regression was used. This project applies two machine learning methods in parallel: logistic regression and a random forest classifier. Both datasets (`data/train.csv` and `data/test.csv`) are provided as CSV files, which we convert into `pandas` dataframes for data cleaning, exploratory data analysis and predicting outcomes for passengers in the test data.
 
 ## Skills demonstrated
 
@@ -54,15 +54,15 @@ The following graphs document the connection between passengers being 'transport
 
 ## Methodology
 
-Building on my first project, I incorporated an additional machine learning model: a random forest classifier. This is a process that uses the training data to form decision trees, and then combines them together at a common root to form a 'forest'. In future projects I intend to use even more robust cross-validation, feature engineering and experiment with a wider variety of machine learning models.
+Building on my first project, I incorporated an additional machine learning model: a random forest classifier. This is a process that uses the training data to form decision trees, and then combines them together at a common root to form a 'forest'. Both models are run in parallel, allowing direct comparison of their cross-validation accuracy and test-set predictions.
 
 ## Validation
 
-I improved on cross-validation by using hyperparameter tuning with logistic regression, finding that the hyperparameter `C=10` is marginally better than `C=1`. Various accuracy scores are printed when `sp_titanic.py` runs to allow comparison of hyperparameters. Cross-validation yielded an accuracy of 80% ± 1% for the random forest model and 79% ± 1% for the logistic regression model. Repeated stratified 5-fold cross-validation was used, which repeatedly splits the training data, using most of it for training and then testing it on the remaining data. This approach is much more statistically robust than simply doing a single train-test split. 
+Both models are tuned using `GridSearchCV`. For logistic regression, the regularisation parameter `C` is searched over a range of values. For the random forest, `n_estimators`, `max_depth`, and `min_samples_leaf` are tuned jointly. The full hyperparameter search results are printed when `sp_titanic.py` runs. Repeated stratified k-fold cross-validation is used as the scoring method throughout, which is much more statistically robust than a single train-test split. Logistic regression uses 5 splits × 10 repeats (50 estimates per combination); random forest uses 5 splits × 3 repeats (15 estimates per combination) to keep tuning time tractable given the larger parameter grid. Cross-validation yielded an accuracy of 80% ± 1% for the random forest model and 79% ± 1% for the logistic regression model.
 
 ## Results
 
-Once complete, the program creates a CSV (`submission.csv`) with predictions. Via submission to Kaggle, I can confirm that the random forest model achieved an accuracy of 0.79097 (79%) for predictions on the test set `test.csv`, within one standard deviation of the mean accuracy of 80% obtained from cross-validation. 
+Once complete, the program creates two CSVs: `submission.csv` (random forest predictions) and `lr_submission.csv` (logistic regression predictions). Via submission to Kaggle, I can confirm that the random forest model achieved an accuracy of 0.79097 (79%) for predictions on the test set `data/test.csv`, within one standard deviation of the mean accuracy of 80% obtained from cross-validation.
 
 ## Scope for further development
 

@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import RepeatedStratifiedKFold, cross_val_score, GridSearchCV
+from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV
+from sklearn.metrics import classification_report
 from sklearn.preprocessing import StandardScaler
 
 def initial_eda(df):
@@ -24,22 +25,22 @@ def initial_eda(df):
     plt.close()
     df_edited = df.copy()
     for col in ('HomePlanet', 'Destination', 'CryoSleep', 'VIP'):
-            if col in ('HomePlanet', 'Destination'):
-                order = df_edited.groupby(col)['Transported'].mean().sort_values().index
+        if col in ('HomePlanet', 'Destination'):
+            order = df_edited.groupby(col)['Transported'].mean().sort_values().index
+        else:
+            order = None
+            if col == 'CryoSleep':
+                df_edited[col] = df_edited[col].map({True:'CryoSleep', False:'No CryoSleep'})
             else:
-                order = None
-                if col == 'CryoSleep':
-                    df_edited[col] = df_edited[col].map({True:'CryoSleep', False:'No CryoSleep'})
-                else:
-                    df_edited[col] = df_edited[col].map({True:'VIP', False:'Not VIP'})
-            plt.figure()
-            sns.barplot(x=col, y='Transported', data=df_edited, estimator=np.mean, order=order)
-            plt.title('Transported Rate by ' + col)
-            plt.xlabel(col)
-            plt.ylabel('Proportion Transported')
-            plt.tight_layout()
-            plt.savefig('figures/transported_rate_by_' + col + '.png')
-            plt.close()
+                df_edited[col] = df_edited[col].map({True:'VIP', False:'Not VIP'})
+        plt.figure()
+        sns.barplot(x=col, y='Transported', data=df_edited, estimator=np.mean, order=order)
+        plt.title('Transported Rate by ' + col)
+        plt.xlabel(col)
+        plt.ylabel('Proportion Transported')
+        plt.tight_layout()
+        plt.savefig('figures/transported_rate_by_' + col + '.png')
+        plt.close()
     missing = df.isna().mean().sort_values(ascending=False)
     missing = missing[missing > 0]
     plt.figure()
@@ -78,27 +79,25 @@ def split_cabin_col(df):
     cabin_index = df.columns.get_loc('Cabin')
     return pd.concat([df.iloc[:, :cabin_index], cabin_split, df.iloc[:, cabin_index + 1:]], axis=1) # replaces 'Cabin' column with the three new ones
 
-def impute_with_mode(df, col):
-    """ Imputes missing values with the mode for that column """
-    mode = df[col].mode()[0]
+def impute_with_mode(df, col, mode):
+    """ Imputes missing values with a pre-computed mode for that column """
     df.loc[df[col].isna(), col] = mode
 
-def impute_with_median(df, col):
-    """ Imputes missing values with the median for that column """
-    median = df[col].median()
+def impute_with_median(df, col, median):
+    """ Imputes missing values with a pre-computed median for that column """
     df.loc[df[col].isna(), col] = median
 
-def impute_spends(df, col):
+def impute_spends(df, col, median_spends):
     """ Imputes missing values for the 'money spent' columns depending on 'CryoSleep' """
     df.loc[(df[col].isna()) & (df['CryoSleep'] == True), col] = 0
     df.loc[(df[col].isna()) & (df['CryoSleep'] == False), col] = median_spends[col]
 
-def bin_variable(df, col, parts=5):
-    """ Bins numerical variables in-place """
-    df[col] = pd.qcut(df[col], q=parts, duplicates='drop')
+def bin_variable(df, col, bin_edges):
+    """ Bins a numerical variable using pre-computed bin edges """
+    df[col] = pd.cut(df[col], bins=bin_edges, include_lowest=True)
     return df
 
-def clean_data(df):
+def clean_data(df, spending, median_spends, modes, medians, bins):
     """ Multi-step data cleaning """
     df = df.drop(columns=['PassengerId', 'Name'])
     df = split_cabin_col(df)
@@ -106,11 +105,11 @@ def clean_data(df):
     # now we impute missing values
 
     for col in ('HomePlanet', 'CryoSleep', 'Deck', 'Side', 'Destination', 'VIP'):
-        impute_with_mode(df, col)
+        impute_with_mode(df, col, modes[col])
     for col in ('Cabin_num', 'Age'):
-        impute_with_median(df, col)
+        impute_with_median(df, col, medians[col])
     for col in spending:
-        impute_spends(df, col)
+        impute_spends(df, col, median_spends)
 
     for col in ('CryoSleep', 'VIP'):
         df[col] = df[col].map({True:1, False:0})
@@ -118,17 +117,13 @@ def clean_data(df):
     df = df.rename(columns={'Side':'Starboard'})
     df.insert(df.columns.get_loc('VRDeck') + 1, 'TotalSpend', df[spending].sum(axis=1))
     for col in ('Cabin_num', 'Age'):
-        df = bin_variable(df, col)
+        df = bin_variable(df, col, bins[col])
     df = pd.get_dummies(df, columns=['HomePlanet', 'Deck', 'Cabin_num', 'Destination', 'Age']) # replaces categorical variables with boolean dummy variables
     return df
 
-def repeated_cross_validation(model, X, y):
-    """ Repeated stratified 5-fold cross-validation for the random forest model """
-    cross_val = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=seed)
-    return cross_val_score(model, X, y, cv=cross_val, scoring='accuracy')
 
-def log_regression(X, y):
-    """ Multi-step process for implementing and testing logistic regression model """
+def log_regression(X, y, X_test, test_id, seed, feature_names):
+    """ Multi-step process for implementing and testing logistic regression model, with final predictions for submission """
 
     model = LogisticRegression(max_iter=5000)
 
@@ -137,26 +132,26 @@ def log_regression(X, y):
     parameters = {'C':[0.01, 0.1, 1, 10, 100, 1000]}
     cross_val = RepeatedStratifiedKFold(n_splits=5, n_repeats=10, random_state=seed)
     grid_search = GridSearchCV(model, parameters, scoring='accuracy', n_jobs=-1, cv=cross_val)
-    scaler = StandardScaler() 
+    scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
     grid_search.fit(X_scaled, y)
     results = pd.DataFrame(grid_search.cv_results_)
     summary = results[['param_C', 'mean_test_score', 'std_test_score']]
     summary = summary.rename(columns={'param_C':'hyperparameter', 'mean_test_score':'mean', 'std_test_score':'std'})
     print()
-    print('Hyperparameter tuning: ')
+    print('Hyperparameter tuning:')
     print()
     print(summary.sort_values('mean', ascending=False).to_string(index=False))
     print()
-    print('C=10 marginally better than C=1')
+    print(f"Best hyperparameter: C={grid_search.best_params_['C']}")
     print()
     best_model = grid_search.best_estimator_
     best_index = grid_search.best_index_
     mean = grid_search.best_score_
     std = grid_search.cv_results_['std_test_score'][best_index]
-    print('Cross-validation accuracy per model:')
-    print()
     print(f"Logistic Regression: {100*mean:.0f} ± {100*std:.0f}")
+    print()
+    print(classification_report(y, best_model.predict(X_scaled), target_names=['Not Transported', 'Transported']))
 
     # plots logistic regression coefficients for feature comparison
 
@@ -167,53 +162,101 @@ def log_regression(X, y):
     plt.xlabel('Coefficient')
     plt.ylabel('Feature')
     plt.savefig('figures/lr_coefficients.png')
+    plt.close()
 
-def random_forest(X, y, X_test):
+    # uses logistic regression model to obtain predictions for test data
+
+    X_test_scaled = scaler.transform(X_test)
+    predictions = best_model.predict(X_test_scaled) == 1
+    submission = pd.DataFrame({'PassengerId': test_id, 'Transported': predictions})
+    submission.to_csv('lr_submission.csv', index=False)
+
+def random_forest(X, y, X_test, seed, feature_names, test_id):
     """ Multi-step process for implementing and testing random forest model, with final predictions for submission """
-    model = RandomForestClassifier(random_state=seed, n_jobs=-1)
-    scores = repeated_cross_validation(model, X, y)
-    print(f"Random Forest: {100*scores.mean():.0f} ± {100*scores.std():.0f}")
-    model.fit(X, y)
+
+    model = RandomForestClassifier(random_state=seed)
+
+    # hyperparameter tuning
+
+    parameters = {
+        'n_estimators':     [100, 300],
+        'max_depth':        [None, 10],
+        'min_samples_leaf': [1, 2, 4]
+    }
+    cross_val = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=seed)
+    grid_search = GridSearchCV(model, parameters, scoring='accuracy', n_jobs=-1, cv=cross_val)
+    grid_search.fit(X, y)
+    results = pd.DataFrame(grid_search.cv_results_)
+    summary = results[['param_n_estimators', 'param_max_depth', 'param_min_samples_leaf', 'mean_test_score', 'std_test_score']]
+    summary = summary.rename(columns={
+        'param_n_estimators':     'n_estimators',
+        'param_max_depth':        'max_depth',
+        'param_min_samples_leaf': 'min_samples_leaf',
+        'mean_test_score':        'mean',
+        'std_test_score':         'std'
+    })
+    print()
+    print('Hyperparameter tuning:')
+    print()
+    print(summary.sort_values('mean', ascending=False).to_string(index=False))
+    print()
+    best_params = grid_search.best_params_
+    print(f"Best hyperparameters: n_estimators={best_params['n_estimators']}, max_depth={best_params['max_depth']}, min_samples_leaf={best_params['min_samples_leaf']}")
+    print()
+    best_model = grid_search.best_estimator_
+    best_index = grid_search.best_index_
+    mean = grid_search.best_score_
+    std = grid_search.cv_results_['std_test_score'][best_index]
+    print(f"Random Forest: {100*mean:.0f} ± {100*std:.0f}")
+    print()
+    print(classification_report(y, best_model.predict(X), target_names=['Not Transported', 'Transported']))
 
     # plots 'feature importances' to assess the influence that each feature had on the model
 
-    importances = pd.Series(model.feature_importances_, index=feature_names).sort_values(ascending=False)
+    importances = pd.Series(best_model.feature_importances_, index=feature_names).sort_values(ascending=False)
     plt.figure(figsize=(20, max(6, 0.25 * len(importances.index))))
     sns.barplot(x=importances, y=importances.index)
     plt.title('Relative Importance of Each Feature in Random Forest Model')
     plt.xlabel('Importance')
     plt.ylabel('Feature')
     plt.savefig('figures/feature_importances.png')
+    plt.close()
 
     # uses random forest model to obtain predictions for test data
 
-    predictions = model.predict(X_test)
-    predictions = predictions == 1
-    submission = pd.DataFrame({'PassengerId':test_id, 'Transported':predictions})
+    predictions = best_model.predict(X_test) == 1
+    submission = pd.DataFrame({'PassengerId': test_id, 'Transported': predictions})
     submission.to_csv('submission.csv', index=False)
 
 
 if __name__ == '__main__':
 
     seed = 345
-    np.random.seed(seed)
-    
-    train = pd.read_csv('train.csv')
-    test = pd.read_csv('test.csv')
+
+    train = pd.read_csv('data/train.csv')
+    test = pd.read_csv('data/test.csv')
 
     initial_eda(train)
 
     test_id = test['PassengerId']
     train['Transported'] = train['Transported'].map({True:1, False:0})
     spending = ['RoomService', 'FoodCourt', 'ShoppingMall', 'Spa', 'VRDeck']
-    median_spends = {}
-    for col in spending:
-        median_spends[col] = train.loc[(train[col].notna()) & (train['CryoSleep'] == False), col].median()
+
+    # compute all imputation values and bin edges from training data only
+    train_split = split_cabin_col(train)
+    modes = {col: train_split[col].mode()[0] for col in ('HomePlanet', 'CryoSleep', 'Deck', 'Side', 'Destination', 'VIP')}
+    medians = {col: train_split[col].median() for col in ('Cabin_num', 'Age')}
+    median_spends = {col: train.loc[(train[col].notna()) & (train['CryoSleep'] == False), col].median() for col in spending}
+    bins = {}
+    for col in ('Cabin_num', 'Age'):
+        _, bin_edges = pd.qcut(train_split[col].dropna(), q=5, retbins=True, duplicates='drop')
+        bin_edges[0], bin_edges[-1] = -np.inf, np.inf  # extend outer edges to cover all test values
+        bins[col] = bin_edges
 
     # apply the data cleaning process
 
-    train = clean_data(train)
-    test = clean_data(test)
+    train = clean_data(train, spending, median_spends, modes, medians, bins)
+    test = clean_data(test, spending, median_spends, modes, medians, bins)
 
     # format data to prepare for applying machine learning models
 
@@ -223,7 +266,9 @@ if __name__ == '__main__':
     X, X_test = X.align(X_test, join='left', axis=1, fill_value=0)
     feature_names = X.columns
 
-    # finally, apply both machine learning models
+    # finally, apply both machine learning models and compare cross-validation accuracy
 
-    log_regression(X, y)
-    random_forest(X, y, X_test)
+    print('Cross-validation accuracy per model:')
+    print()
+    log_regression(X, y, X_test, test_id, seed, feature_names)
+    random_forest(X, y, X_test, seed, feature_names, test_id)
