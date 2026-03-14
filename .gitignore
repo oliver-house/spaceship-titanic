@@ -1,0 +1,25 @@
+# Bytecode and cache
+
+__pycache__/
+*.pyc
+
+# VS Code and other IDE configurations
+
+.vscode/
+.idea/
+
+# Output files and logs
+
+*.log
+submission.csv
+figures/
+
+# Data files
+
+train.csv
+test.csv
+
+# OS-generated files
+
+.DS-Store
+Thumbs.dmb
